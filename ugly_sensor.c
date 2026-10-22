@@ -14,20 +14,20 @@
 typedef struct { 
   uint32_t addr; 
   uint32_t val;
- } Reg_t;
+ } reg_t;
 int g_mode_count=0;
-Reg_t *g_regs= NULL;
+reg_t *g_regs= NULL;
 
 //fake i2c read 
-uint32_t ReadReg(uint32_t a)
+uint32_t read_reg(uint32_t a)
 { 
   return a * 2;
  }   
  
 //validate the sensor name and initialize registers
-int InitSensor(char *name)
+int init_sensor(char *name)
 {
-  char DevName[DEVICE_NAME_LENGTH];
+  char dev_name[DEVICE_NAME_LENGTH];
   int i,ret;
   int len;
 
@@ -35,12 +35,12 @@ if (name == NULL) {
 	return -EINVAL;
 }
 
-len = snprintf(DevName,sizeof(DevName),"%s",name);
+len = snprintf(dev_name,sizeof(dev_name),"%s",name);
 
-if (len < 0 || (size_t)len >= sizeof(DevName)) {
+if (len < 0 || (size_t)len >= sizeof(dev_name)) {
 	return -EINVAL;
 } 
-  g_regs = malloc(REG_COUNT * sizeof(Reg_t));
+  g_regs = malloc(REG_COUNT * sizeof(reg_t));
 
   if (g_regs == NULL) {
     
@@ -49,17 +49,17 @@ if (len < 0 || (size_t)len >= sizeof(DevName)) {
 
   for (i=0;i<REG_COUNT;i++){
       g_regs[i].addr = SENSOR_REG_BASE + i;
-      g_regs[i].val = ReadReg(g_regs[i].addr);
+      g_regs[i].val = read_reg(g_regs[i].addr);
   }
 
   if(g_regs[0].val == SENSOR_OK_VALUE){
       printf("sensor ok\n");
-      printf("init done\n"); 
-  
+     
   }
-   
+    printf("init done\n"); 
 
   switch(g_regs[1].val) {
+
   case SENSOR_MODE_1_VALUE : 
         g_mode_count = 1;
          break;
@@ -67,9 +67,11 @@ if (len < 0 || (size_t)len >= sizeof(DevName)) {
   case SENSOR_MODE_2_VALUE : 
          g_mode_count = 2; 
          break;
+
   default :
     g_mode_count=0;
 		break;
+
   }
   if(g_mode_count > 1){
     ret = 0;
@@ -81,7 +83,7 @@ if (len < 0 || (size_t)len >= sizeof(DevName)) {
   int t = -1;
   if (t < (int)limit){
     printf("t is small\n");
-    t++;
+   
   }   
   ret=SQUARE(ret + 1);
   free(g_regs);
@@ -93,7 +95,7 @@ if (len < 0 || (size_t)len >= sizeof(DevName)) {
 // main function
 int main() { 
   int ret;
-  ret=InitSensor("CameraSensor0"); 
+  ret=init_sensor("CameraSensor0"); 
   if(ret == -EINVAL){
     printf("Invalid sensor name");
     return EXIT_FAILURE;
